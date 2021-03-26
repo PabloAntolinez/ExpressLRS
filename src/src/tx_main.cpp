@@ -720,11 +720,34 @@ void setup()
   config.SetStorageProvider(&eeprom); // Pass pointer to the Config class for access to storage
   config.Load(); // Load the stored values from eeprom
 
+
+
   // Set the pkt rate, TLM ratio, and power from the stored eeprom values
   SetRFLinkRate(config.GetRate());
   ExpressLRS_nextAirRateIndex = ExpressLRS_currAirRate_Modparams->index;
   ExpressLRS_currAirRate_Modparams->TLMinterval = (expresslrs_tlm_ratio_e)config.GetTlm();
   POWERMGNT.setPower((PowerLevels_e)config.GetPower());
+
+  #ifdef USE_R9M_DIP_SWITCH_ON_DEVIATIONTX
+  if (digitalRead(GPIO_PIN_DIP1) == LOW)
+  {
+    POWERMGNT.setPower((PowerLevels_e)2); // 50mW
+  }
+  else
+  {
+    POWERMGNT.setPower((PowerLevels_e)4); // 250mW
+  }
+  if (digitalRead(GPIO_PIN_DIP2) == LOW)
+  {
+    SetRFLinkRate(2); // 50Hz
+  }
+  else
+  {
+    SetRFLinkRate(0); // 200Hz 
+  }
+
+
+  #endif
 
   crsf.Begin();
   hwTimer.init();
